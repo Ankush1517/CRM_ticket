@@ -80,7 +80,7 @@ exports.viewTickets = async (req, res) => {
 };
 
 exports.updateTicketStatus = async (req, res) => {
-  const { ticket_id, status, response } = req.body;
+  const { ticket_id, status, response, type, category } = req.body;
   const employeeId = req.user.id;
 
   try {
@@ -89,8 +89,11 @@ exports.updateTicketStatus = async (req, res) => {
       return res.status(404).json({ error: 'Ticket not found or not assigned to this employee' });
     }
 
+    
     ticket.status = status;
     ticket.response = response;
+    ticket.type = type ;
+    ticket.category = category ;
     await ticket.save();
 
     res.status(200).json({ message: 'Ticket status updated', ticket });

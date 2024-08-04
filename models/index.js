@@ -10,21 +10,12 @@ const Employee = require('./Employee')(sequelize);
 const Ticket = require('./Ticket')(sequelize);
 
 
-// Update the associations
 Customer.hasMany(Ticket, { foreignKey: 'customer_id', sourceKey: 'customer_id' });
 Ticket.belongsTo(Customer, { foreignKey: 'customer_id', targetKey: 'customer_id' });
 
 Employee.hasMany(Ticket, { foreignKey: 'employee_id' });
 Ticket.belongsTo(Employee, { foreignKey: 'employee_id' });
 
-
-
-/*
-Customer.hasMany(Ticket, { foreignKey: 'customer_id' });
-Ticket.belongsTo(Customer, { foreignKey: 'customer_id' });
-
-Employee.hasMany(Ticket, { foreignKey: 'employee_id' });
-Ticket.belongsTo(Employee, { foreignKey: 'employee_id' });*/
 
 module.exports = {
   sequelize,

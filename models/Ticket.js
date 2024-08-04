@@ -16,5 +16,9 @@ module.exports = (sequelize) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    type: DataTypes.STRING,
+    category: DataTypes.STRING,
+  
+
   });
 };
