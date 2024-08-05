@@ -19,3 +19,5 @@ function generateCustomerId() {
     const timestamp = Date.now();
     return `CUST-${randomNum}-${timestamp}`;
 }
+
+

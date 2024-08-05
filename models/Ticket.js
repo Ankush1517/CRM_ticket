@@ -7,6 +7,11 @@ module.exports = (sequelize) => {
       autoIncrement: true,
       primaryKey: true
     },
+    ticket_id: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
     customer_id: DataTypes.INTEGER,
     employee_id: DataTypes.INTEGER,
     status: DataTypes.STRING,

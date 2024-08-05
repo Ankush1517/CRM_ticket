@@ -19,10 +19,9 @@ exports.registerUser = async (req, res) => {
       //const username = `${name}${phone.slice(-4)}`;
       const username = `${name.replace(/\s+/g, '')}${phone.slice(-4)}`;
 
-  
       const customer = new Customer({
         name, email, phone, address, customer_id, account_creation_date, account_status, username, password: hashedPassword
-      });
+      }); 
   
       await customer.save();
       res.status(201).json(customer);
@@ -65,50 +64,3 @@ function generateCustomerId() {
 }
 
 
-// const jwt = require('jsonwebtoken');
-// const bcrypt = require('bcrypt');
-// const { Employee, Customer } = require('../models');
-
-// exports.registerEmployee = async (req, res) => {
-//   const { username, password } = req.body;
-//   const hashedPassword = await bcrypt.hash(password, 10);
-//   const user = new Employee({ username, password: hashedPassword });
-//   await user.save();
-//   res.status(201).send('Employee registered');
-// };
-
-// exports.registerCustomer = async (req, res) => {
-//   const { name, email, phone, address, account_status, password } = req.body;
-//   const hashedPassword = await bcrypt.hash(password, 10);
-//   const customer_id = generateCustomerId();
-//   const account_creation_date = new Date();
-//   const username = `${name}${phone.slice(-4)}`;
-
-//   const customer = new Customer({
-//     name, email, phone, address, customer_id, account_creation_date, account_status, username, password: hashedPassword
-//   });
-
-//   await customer.save();
-//   res.status(201).send('Customer registered');
-// };
-
-// exports.login = async (req, res) => {
-//   const { username, password } = req.body;
-//   let user = await Employee.findOne({ where: { username } });
-//   if (!user) {
-//     user = await Customer.findOne({ where: { username } });
-//   }
-
-//   if (user && await bcrypt.compare(password, user.password)) {
-//     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET);
-//     res.json({ token });
-//   } else {
-//     res.status(401).send('Invalid credentials');
-//   }
-// };
-
-// function generateCustomerId() {
-//     const randomNum = Math.floor(Math.random() * 10000);
-//     const timestamp = Date.now();
-//     return `CUST-${randomNum}-${timestamp}`;
-// }

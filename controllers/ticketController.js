@@ -1,7 +1,9 @@
 const { Ticket, Employee, Customer } = require('../models');
+const { v4: uuidv4 } = require('uuid'); // Import UUID
 
 exports.raiseTicket = async (req, res) => {
-  const { customer_id, description } = req.body;
+  const { customer_id, description, type, category } = req.body;
+  const ticket_id = uuidv4(); // Generate unique ticket ID
 
    // Debugging: print the customer_id
    console.log('Received customer_id:', customer_id);
@@ -34,7 +36,7 @@ exports.raiseTicket = async (req, res) => {
 
 
   const ticket = new Ticket({
-    customer_id: parsedCustomerId, employee_id, status: 'Open', description, created_at: new Date()
+    customer_id: parsedCustomerId, employee_id, status: 'Open', type, category, ticket_id, description, created_at: new Date()
   });
 
   await ticket.save();
@@ -100,5 +102,27 @@ exports.updateTicketStatus = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.deleteTicket = async (req, res) => {
+  try {
+      const { ticket_id } = req.params;
+
+      // Check if the user is an employee
+      if (req.user.role !== 'employee') {
+          return res.status(403).json({ error: 'Only employees can delete tickets.' });
+      }
+
+      const ticket = await Ticket.findOne({ where: { ticket_id } });
+
+      if (!ticket) {
+          return res.status(404).json({ error: 'Ticket not found.' });
+      }
+
+      await ticket.destroy();
+      res.status(200).json({ message: 'Ticket deleted successfully.' });
+  } catch (error) {
+      res.status(500).json({ error: 'An error occurred while deleting the ticket.' });
   }
 };
