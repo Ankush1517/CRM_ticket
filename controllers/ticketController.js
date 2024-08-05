@@ -126,3 +126,31 @@ exports.deleteTicket = async (req, res) => {
       res.status(500).json({ error: 'An error occurred while deleting the ticket.' });
   }
 };
+
+//new one
+
+exports.getTicketsByStatus = async (req, res) => {
+  const { status } = req.params;
+
+  try {
+      // Validate status
+      if (!['open', 'closed', 'pending'].includes(status)) {
+          return res.status(400).json({ error: 'Invalid status. Valid statuses are open, closed, or pending.' });
+      }
+
+      // Fetch tickets based on status
+      const tickets = await Ticket.findAll({
+          where: { status }
+          //include: [{ model: Customer }, { model: Employee }] // Include related models if needed
+      });
+  
+      if (tickets.length === 0) {
+          return res.status(404).json({ message: 'No tickets found for the specified status.' });
+      }
+
+      return res.status(200).json(tickets);
+  } catch (error) {
+      console.error('Error fetching tickets by status:', error);
+      return res.status(500).json({ error: 'Internal server error.' });
+  }
+};
