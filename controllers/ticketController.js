@@ -82,20 +82,22 @@ exports.viewTickets = async (req, res) => {
 };
 
 exports.updateTicketStatus = async (req, res) => {
-  const { ticket_id, status, response, type, category } = req.body;
+
+  const { ticket_id, status } = req.body;
+  //const { ticket_id, status, response, type, category } = req.body;
   const employeeId = req.user.id;
 
   try {
-    const ticket = await Ticket.findOne({ where: { id: ticket_id, employee_id: employeeId } });
+    const ticket = await Ticket.findOne({ where: { ticket_id: ticket_id, employee_id: employeeId } });
     if (!ticket) {
       return res.status(404).json({ error: 'Ticket not found or not assigned to this employee' });
     }
 
     
     ticket.status = status;
-    ticket.response = response;
-    ticket.type = type ;
-    ticket.category = category ;
+    // /ticket.response = response;
+    // ticket.type = type ;
+    // ticket.category = category ;
     await ticket.save();
 
     res.status(200).json({ message: 'Ticket status updated', ticket });
@@ -109,10 +111,10 @@ exports.deleteTicket = async (req, res) => {
   try {
       const { ticket_id } = req.params;
 
-      // Check if the user is an employee
+      /*// Check if the user is an employee
       if (req.user.role !== 'employee') {
           return res.status(403).json({ error: 'Only employees can delete tickets.' });
-      }
+      }*/
 
       const ticket = await Ticket.findOne({ where: { ticket_id } });
 
@@ -121,7 +123,16 @@ exports.deleteTicket = async (req, res) => {
       }
 
       await ticket.destroy();
-      res.status(200).json({ message: 'Ticket deleted successfully.' });
+
+      //additional comments 
+      console.log('Customer: ', req.user);
+      const user= await Customer.findByPk(req.user.id);
+      console.log("user found",user);
+      tickets = await Ticket.findAll({ where: { customer_id: user.customer_id } });
+      
+      res.status(200).json(tickets);
+      //
+     /* res.status(200).json({ message: 'Ticket deleted successfully.' });*/
   } catch (error) {
       res.status(500).json({ error: 'An error occurred while deleting the ticket.' });
   }
@@ -152,5 +163,66 @@ exports.getTicketsByStatus = async (req, res) => {
   } catch (error) {
       console.error('Error fetching tickets by status:', error);
       return res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+//two more functions 
+
+// Function to allow customers to reopen their closed tickets
+exports.reopenTicket = async (req, res) => {
+  try {
+    const { ticket_id } = req.params;
+
+    
+   // const { customer_id } = req.user; 
+
+    const ticket = await Ticket.findOne({ where: { ticket_id} });
+    
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    if (ticket.status !== 'closed') {
+      return res.status(400).json({ error: 'Only closed tickets can be reopened' });
+    }
+
+    ticket.status = 'open';
+    await ticket.save();
+
+    res.status(200).json({ message: 'Ticket reopened successfully', ticket });
+  } catch (error) {
+    console.error('Error reopening ticket:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// Function to allow customers to provide a rating for their closed tickets
+exports.rateTicket = async (req, res) => {
+  try {
+    const { ticket_id } = req.params;
+    //const { customer_id } = req.user; // Assuming customer_id is available in req.user after authentication
+    const { rating } = req.body;
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    const ticket = await Ticket.findOne({ where: { ticket_id} });
+    
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    if (ticket.status !== 'closed') {
+      return res.status(400).json({ error: 'Only closed tickets can be rated' });
+    }
+
+    ticket.rating = rating;
+    await ticket.save();
+
+    res.status(200).json({ message: 'Rating submitted successfully', ticket });
+  } catch (error) {
+    console.error('Error rating ticket:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
