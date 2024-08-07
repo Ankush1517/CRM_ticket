@@ -226,3 +226,20 @@ exports.rateTicket = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+exports.getTicketById = async (req, res) => {
+  const { ticket_id } = req.params;
+
+  try {
+    const ticket = await Ticket.findOne({ where: { ticket_id } });
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    res.status(200).json(ticket);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
