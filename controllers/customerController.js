@@ -1,5 +1,26 @@
 const { Customer } = require('../models');
 
+exports.getCustomerDetails = async (req, res) => {
+  try {
+
+      const user= await Customer.findByPk(req.user.id);
+      
+      const customer = await Customer.findAll({ where: { customer_id: user.customer_id }, 
+          attributes: ['name', 'email', 'username'] 
+      });
+
+      if (!customer) {
+          return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      res.status(200).json(customer);
+  } catch (error) {
+      console.error('Error fetching customer details:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 exports.createCustomer = async (req, res) => {
   const { name, email, phone, address, account_status } = req.body;
   const customer_id = generateCustomerId();

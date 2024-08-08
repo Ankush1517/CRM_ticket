@@ -1,5 +1,5 @@
 const express = require('express');
-const { raiseTicket, viewTickets, deleteTicket, getTicketsByStatus } = require('../controllers/ticketController');
+const { raiseTicket, viewTickets, deleteTicket, getTicketsByStatus, updateCustomerTicket } = require('../controllers/ticketController');
 const { updateTicketStatus, reopenTicket,rateTicket, getTicketById, changePassword } = require('../controllers/ticketController');
 const router = express.Router();
 const { authenticateJWT } = require('../middlewares/authMiddleware');
@@ -23,6 +23,9 @@ router.get('/:ticket_id', authenticateJWT, getTicketById);
 
 //changing password 
 router.patch('/change-password', authenticateJWT, changePassword);
+
+//customer updating own ticket
+router.patch('/update/:ticket_id', authenticateJWT, updateCustomerTicket);
 
 
 module.exports = router;

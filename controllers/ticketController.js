@@ -296,4 +296,34 @@ exports.changePassword = async (req, res) => {
   }
 };
 
+//functionality to allow customers to update their own tickets
+
+exports.updateCustomerTicket = async (req, res) => {
+  try {
+    const { ticket_id } = req.params; // Get the ticket_id from the request params
+    const { category, type, description } = req.body; // Get the updated fields from the request body
+    const customerId = req.user.id; 
+
+    // Find the ticket belonging to the customer
+    const ticket = await Ticket.findOne({ where: { ticket_id} });
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found or does not belong to this customer' });
+    }
+
+    // Update the ticket details
+    ticket.category = category || ticket.category;
+    ticket.type = type || ticket.type;
+    ticket.description = description || ticket.description;
+
+    await ticket.save();
+
+    res.status(200).json({ message: 'Ticket updated successfully', ticket });
+  } catch (error) {
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
 
