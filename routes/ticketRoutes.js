@@ -1,6 +1,6 @@
 const express = require('express');
 const { raiseTicket, viewTickets, deleteTicket, getTicketsByStatus } = require('../controllers/ticketController');
-const { updateTicketStatus, reopenTicket,rateTicket, getTicketById } = require('../controllers/ticketController');
+const { updateTicketStatus, reopenTicket,rateTicket, getTicketById, changePassword } = require('../controllers/ticketController');
 const router = express.Router();
 const { authenticateJWT } = require('../middlewares/authMiddleware');
 
@@ -20,5 +20,9 @@ router.put('/reopen/:ticket_id', authenticateJWT, reopenTicket);
 router.put('/rate/:ticket_id', authenticateJWT, rateTicket);
 
 router.get('/:ticket_id', authenticateJWT, getTicketById);
+
+//changing password 
+router.patch('/change-password', authenticateJWT, changePassword);
+
 
 module.exports = router;

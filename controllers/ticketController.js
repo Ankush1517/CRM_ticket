@@ -1,5 +1,8 @@
+const { where } = require('sequelize');
 const { Ticket, Employee, Customer } = require('../models');
 const { v4: uuidv4 } = require('uuid'); // Import UUID
+
+const bcrypt = require('bcrypt');
 
 exports.raiseTicket = async (req, res) => {
   const { customer_id, description, type, category } = req.body;
@@ -36,7 +39,7 @@ exports.raiseTicket = async (req, res) => {
 
 
   const ticket = new Ticket({
-    customer_id: parsedCustomerId, employee_id, status: 'Open', type, category, ticket_id, description, created_at: new Date()
+    customer_id: parsedCustomerId, employee_id, status: 'Open', type, category, ticket_id, description, created_at: new Date(), raisedBy: customer.name,
   });
 
   await ticket.save();
@@ -64,11 +67,20 @@ exports.viewTickets = async (req, res) => {
   try {
     let tickets;
     if (req.user.role === 'customer') {
-
-      console.log('Customer: ', req.user);
+      
+      /*
+      console.log('Customer: ', req.user);*/
+      //getting customer name 
       const user= await Customer.findByPk(req.user.id);
-      console.log("user found",user);
+      console.log("name of customer: ",user.name);
       tickets = await Ticket.findAll({ where: { customer_id: user.customer_id } });
+
+       
+
+  
+    
+
+      //console.log("ticket details", tickets);
 
     } else if (req.user.role === 'employee') {
       tickets = await Ticket.findAll();
@@ -77,6 +89,7 @@ exports.viewTickets = async (req, res) => {
     }
     res.status(200).json(tickets);
   } catch (err) {
+    console.log(err)
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -86,6 +99,10 @@ exports.updateTicketStatus = async (req, res) => {
   const { ticket_id, status } = req.body;
   //const { ticket_id, status, response, type, category } = req.body;
   const employeeId = req.user.id;
+
+  //getting employee name through employee id
+  const user= await Employee.findByPk(req.user.id);
+  console.log(user.username);
 
   try {
     const ticket = await Ticket.findOne({ where: { ticket_id: ticket_id, employee_id: employeeId } });
@@ -98,6 +115,9 @@ exports.updateTicketStatus = async (req, res) => {
     // /ticket.response = response;
     // ticket.type = type ;
     // ticket.category = category ;
+    //adding the name of updater 
+    ticket.updatedBy = user.username; 
+    console.log(req.user.username) ;
     await ticket.save();
 
     res.status(200).json({ message: 'Ticket status updated', ticket });
@@ -242,4 +262,38 @@ exports.getTicketById = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+//adding another functionality
+
+exports.changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  const customerId = req.user.id;
+
+  try {
+      // Fetch the customer by ID
+      const customer = await Customer.findByPk(customerId);
+      if (!customer) {
+          return res.status(404).json({ error: 'Customer not found' });
+      }
+
+      // Verify the old password
+      const isMatch = await bcrypt.compare(oldPassword, customer.password);
+      if (!isMatch) {
+          return res.status(400).json({ error: 'Old password is incorrect' });
+      }
+
+      // Hash the new password
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update the customer's password
+      customer.password = hashedNewPassword;
+      await customer.save();
+
+      res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+      console.error('Error changing password:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 

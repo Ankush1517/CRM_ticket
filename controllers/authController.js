@@ -34,6 +34,9 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+
+
+
 exports.login = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -53,6 +56,7 @@ exports.login = async (req, res) => {
     res.status(500).send('Error logging in');
   }
 };
+
 
 function generateCustomerId() {
 

@@ -27,7 +27,15 @@ module.exports = (sequelize) => {
     },
     type: DataTypes.STRING,
     category: DataTypes.STRING,
-    rating: DataTypes.INTEGER
+    rating: DataTypes.INTEGER,
+    raisedBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    updatedBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   
 
   });
